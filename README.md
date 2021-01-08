@@ -14,7 +14,7 @@ Broadway James 400
 one directional streets exist, also path from intersection to another and from that other to the first one are not guaranteed to be the same ( A to B is 5 but B to A is 6)
 
 # Tasks
-1. Checks if there is a way to reach one intersection from another given intersection
+1. Checks if there is a way to reach one intersection from another given intersection --- DONE
 2. Find 3 shortest routes between two given intersections
 3. If intersections are closed off (construction or w/e)(will be passed as a list) alternatively find the three shortest routes between the two given intersections
 4. Check if given an intersection you can go around a part of the city and get back to where you started from
