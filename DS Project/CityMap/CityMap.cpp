@@ -1,4 +1,3 @@
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
@@ -54,10 +53,9 @@ void readStreet(std::string strArr[], std::size_t& begIndex)
 	strArr[3] = takeIntersection(strArr[0], begIndex, characterCount);
 	begIndex = i + 1;
 }
-void init(std::ifstream& infile, Graph& graph)
+int init(std::ifstream& infile, Graph& graph, std::unordered_map<std::string, int>& map)
 {
 	unsigned int uniqueIntersections = 1;
-	std::unordered_map<std::string, int> map;
 
 	std::string str = "";
 	while (std::getline(infile, str))
@@ -89,7 +87,6 @@ void init(std::ifstream& infile, Graph& graph)
 
 		graph.addPath(map[strArr[1]], map[strArr[2]], num);
 
-
 		if (begIndex < size)
 		{
 			std::size_t characterCount = 0;
@@ -116,14 +113,31 @@ void init(std::ifstream& infile, Graph& graph)
 			graph.addPath(map[strArr[1]], map[strArr[2]], num);
 		}
 	}
+
+	return map.size();
 }
 
+
+
+std::vector<Path> Graph::graph[];
+bool Graph::Algorithms::visited[];
+unsigned int Graph::Algorithms::distance[];
 int main(int argc, char* argv[])
 {
+	std::unordered_map<std::string, int> map;
 	Graph graph;
 	std::ifstream infile(argv[1], std::ios::in);
 	
-	init(infile, graph);
-	
+	int unique = init(infile, graph, map) + 1;
 	graph.print();
+	std::cout << "\n\n";
+
+	std::string intersection;
+	std::cout << "Intersection 1:";
+	std::cin >> intersection;
+	Graph::Algorithms::dijkstra(map[intersection]);
+	std::cout << "Intersection 2:";
+	std::cin >> intersection;
+	std::cout << Graph::Algorithms::checkPath(map[intersection]);
+	//Graph::Algorithms::print(unique);
 }
