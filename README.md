@@ -11,7 +11,7 @@ Broadway James 400
 
 ...
 
-one directional streets exist, also path from intersection to another and from that other to the first one are not guaranteed to be the same
+one directional streets exist, also path from intersection to another and from that other to the first one are not guaranteed to be the same ( A to B is 5 but B to A is 6)
 
 # Tasks
 1. Checks if there is a way to reach one intersection from another given intersection
