@@ -4,8 +4,11 @@ Program that represents a map of a city. The information about the city is conta
 
 # Example
 Hamilton Lookout 150 Broadway 100
+
 Lookout Hamilton 150
+
 Broadway James 400
+
 ...
 
 one directional streets exist, also path from intersection to another and from that other to the first one are not guaranteed to be the same
