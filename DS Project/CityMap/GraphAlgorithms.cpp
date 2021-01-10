@@ -44,8 +44,6 @@ void GraphAlgorithm::dijkstra(std::size_t startingPoint)
 	}
 }
 
-
-
 std::vector<int> GraphAlgorithm::dijkstra(std::size_t startingPoint, std::size_t endingPoint, std::vector<Path>* graph)
 {
 	// parent array to know where we came from
@@ -111,6 +109,8 @@ std::vector<int> GraphAlgorithm::dijkstra(std::size_t startingPoint, std::size_t
 
 std::vector<int>* GraphAlgorithm::YenAlgorithmForThreePaths(std::size_t startingPoint, std::size_t endingPoint)
 {
+	//Space Complexity - KN where K is amount of desired paths - 1
+	//Time Complexity - O(KN ^ 3) 
 	std::cout << "Printing shortest paths between " << startingPoint << " and " << endingPoint << "\n";
 	
 	// normal dijkstra to find shortest path
