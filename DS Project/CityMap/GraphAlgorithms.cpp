@@ -238,7 +238,7 @@ std::vector<int>* GraphAlgorithm::YenAlgorithmForThreePaths(std::size_t starting
 	size = second.size();
 	for (int i = 0; i < size; i++)
 	{
-		paths[2].emplace_back(second[i]);
+		paths[1].emplace_back(second[i]);
 	}
 	size = third.size();
 	for (int i = 0; i < size; i++)
