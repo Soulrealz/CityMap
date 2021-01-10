@@ -1,7 +1,13 @@
 Hamilton Lookout 150 Broadway 100
 
-Lookout Hamilton 150
-
 Broadway James 400
 
+Broadway Bruce 15
+
+Bruce James 25
+
 Doomsday Heaven 200
+
+James Doomsday 50
+
+Lookout Broadway 50

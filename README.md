@@ -14,8 +14,10 @@ Broadway James 400
 one directional streets exist, also path from intersection to another and from that other to the first one are not guaranteed to be the same ( A to B is 5 but B to A is 6)
 
 # Tasks
-1. Checks if there is a way to reach one intersection from another given intersection --- DONE
-2. Find 3 shortest routes between two given intersections
+1. Checks if there is a way to reach one intersection from another given intersection 
+--- DONE using dijkstra
+2. Find 3 shortest routes between two given intersections 
+--- DONE using Yen Algorithm for K Shortest Paths
 3. If intersections are closed off (construction or w/e)(will be passed as a list) alternatively find the three shortest routes between the two given intersections
 4. Check if given an intersection you can go around a part of the city and get back to where you started from
 5. Check if you can go around all intersections without visiting the same intersection twice. If such a feat is possible, calculate that distance
