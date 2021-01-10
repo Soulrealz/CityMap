@@ -1,30 +1,20 @@
 #include "Graph.h"
 
-void Graph::Algorithms::dijkstra(std::size_t startingPoint)
+void Graph::removePath(unsigned int from, unsigned int to)
 {
-	std::priority_queue<pair, std::vector<pair>, std::greater<pair>> toVisit;
-
-	std::fill(visited, visited + MAXSIZE, false);
-	std::fill(distance, distance + MAXSIZE, INT_MAX);
-	distance[startingPoint] = 0;
-	toVisit.push({ 0, startingPoint });
-
-	while (!toVisit.empty())
+	// As it is not mxn matrix
+	// we need to get size of vector in "from" position in array
+	for (int i = 0; i < graph[from].size(); i++)
 	{
-		int node = toVisit.top().second;
-		toVisit.pop();
-
-		if (visited[node])
-			continue;
-
-		visited[node] = true;
-		for (Path neighbor : Graph::graph[node])
+		// From pos in Array
+		// i pos in vector
+		// so if we have 1 -> 2, 1 -> 3 graph and want to remove 2 and 3
+		// graph[1][1].2 == 2
+		// graph[1][2].3 == 3
+		if (graph[from][i].to == to)
 		{
-			if (distance[node] + neighbor.length >= distance[neighbor.to])
-				continue;
-
-			distance[neighbor.to] = distance[node] + neighbor.length;
-			toVisit.push({ distance[neighbor.to], neighbor.to });
+			graph[from][i].length = INT_MAX;
+			break;
 		}
 	}
 }

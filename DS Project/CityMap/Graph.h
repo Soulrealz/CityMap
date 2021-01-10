@@ -1,9 +1,9 @@
 #pragma once
 #include <vector>
 #include <iostream>
-#include <queue>
-#include <limits.h>
 
+
+// Struct to construct edges/connections between 2 nodes(intersections)
 struct Path
 {
 	unsigned int to, length;
@@ -20,35 +20,28 @@ const int MAXSIZE = 1000;
 class Graph
 {
 public:
-	Graph() {}
-	void addPath(unsigned int from, unsigned int to, unsigned int length) { graph[from].emplace_back(Path(to, length)); }
+	Graph() = default;
 
+	// Constructing Path with to,length and assigning it to vector on pos "from" in array
+	void addPath(unsigned int from, unsigned int to, unsigned int length) { graph[from].emplace_back(Path(to, length)); }	
+
+	// Utility function to "remove" paths
+	// required in order to find more than one shortest path
+	void removePath(unsigned int from, unsigned int to);
+	std::vector<Path>* getGraph() const { return graph; }
+	std::size_t getSize() const { return size; }
+
+	// Printing entire graph with every connection : <node> <node> <length>
+	// 1 2 100
+	// 1 3 150
+	// etc
 	void print() const
 	{
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < graph[i].size(); j++)
 				std::cout << i << " " << graph[i][j] << "\n";
 	}
-
-	struct Algorithms
-	{
-	public:
-#define pair std::pair<int, int>
-		static void dijkstra(std::size_t startingPoint);
-		static bool checkPath(std::size_t to) { return !(distance[to] == INT_MAX); }
-
-		static void print(std::size_t size)
-		{
-			for (std::size_t i = 1; i < size; i++)
-			{
-				std::cout << i << " " << distance[i] << "\n";
-			}
-		}
-
-	private:
-		static bool visited[MAXSIZE];
-		static unsigned int distance[MAXSIZE];
-	};
 private:
 	static std::vector<Path> graph[MAXSIZE];
+	std::size_t size;
 };
