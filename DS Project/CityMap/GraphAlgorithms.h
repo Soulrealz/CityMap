@@ -6,6 +6,7 @@ class GraphAlgorithm
 public:
 	GraphAlgorithm(Graph& _graph) : graph(_graph) {}
 	void setSize(std::size_t _size) { size = _size; }
+	std::size_t getSize() const { return size; }
 
 	// Normal dijkstra
 	void dijkstra(std::size_t startingPoint);
@@ -18,42 +19,8 @@ public:
 	std::vector<std::vector<int>> YenAlgorithmForThreePaths(std::size_t startingPoint, std::size_t endingPoint);
 
 
-	bool isCyclicUtil(int v, bool *recStack)
-	{
-		if (visited[v] == false)
-		{
-			// Mark the current node as visited and part of recursion stack 
-			visited[v] = true;
-			recStack[v] = true;
-			auto grph = graph.getGraph();
-			// Recur for all the vertices adjacent to this vertex 
-			for (int i = 0; i < grph[v].size(); i++)
-			{
-				if (!visited[grph[v][i].to] && isCyclicUtil(grph[v][i].to, recStack))
-					return true;
-				else if (recStack[grph[v][i].to])
-					return true;
-			}
-
-		}
-		recStack[v] = false;  // remove the vertex from recursion stack 
-		return false;
-	}
-
-	bool isCyclic(int node)
-	{
-		bool* recStack = new bool[size];
-
-		std::fill(visited, visited + size, false);
-		std::fill(recStack, recStack + size, false);
-
-		// Call the recursive helper function to detect cycle in different 
-		// DFS trees 
-		//for (int i = 1; i < size; i++)
-		//	if (isCyclicUtil(i, recStack))
-		//		return true;
-		return isCyclicUtil(node, recStack);
-	}
+	
+	bool isCyclic(int node);
 
 	// Checks if a path exists to node from lastly used node for dijkstra
 	bool checkPath(std::size_t to) { return !(distance[to] == INT_MAX); }
@@ -89,6 +56,9 @@ protected:
 	std::size_t size;
 	bool visited[MAXSIZE];
 	unsigned int distance[MAXSIZE];
+
+
+	bool isCyclicUtil(int v, bool *recStack);
 };
 
 

@@ -54,7 +54,7 @@ void readStreet(std::string strArr[], std::size_t& begIndex)
 	strArr[3] = takeIntersection(strArr[0], begIndex, characterCount);
 	begIndex = i + 1;
 }
-int init(std::ifstream& infile, Graph& graph, Map& map)
+void init(std::ifstream& infile, Graph& graph, Map& map)
 {
 	// How many different intersecitons there are
 	unsigned int uniqueIntersections = 1;
@@ -139,10 +139,122 @@ int init(std::ifstream& infile, Graph& graph, Map& map)
 			graph.addPath(map.getCorrespondingNode(strArr[1]), map.getCorrespondingNode(strArr[2]), num);
 		}
 	}
-
-	return map.getSize();
 }
 
+void menu(Graph& graph, GraphAlgorithm& algos, Map& map)
+{
+	int c = 0;
+	while (c != 9)
+	{
+		std::cout << "Options:\n1.Check if you can reach A from B:\n";
+		std::cout << "2.Find 3 shortest routes between A and B:\n";
+		std::cout << "3.Check for a cycle after being given A:\n";
+		std::cout << "4.Check if you can reach ALL intersections from A:\n";
+		std::cout << "9.Quit\n";
+		std::cout << "\nChoose Your Option:";
+		std::cin >> c;
+
+		switch (c)
+		{
+		case 1:
+			std::cout << "Choose two intersections:\n";
+			try
+			{
+				std::string intersectionOne;
+				std::cout << "Intersection 1:";
+				std::cin >> intersectionOne;
+				std::cout << "Intersection 2:";
+				std::string intersectionTwo;
+				std::cin >> intersectionTwo;
+				std::cout << "\n";
+				algos.dijkstra(map.getCorrespondingNode(intersectionOne));
+
+				if (algos.checkPath(map.getCorrespondingNode(intersectionTwo)))
+					std::cout << "A path exists between those intersections\n";
+				else std::cout << "A path does not exist between those intersections\n";
+			}
+			catch (...) { std::cout << "Invalid intersection\n"; }
+			break;
+		case 2:
+			std::cout << "Choose two intersections:\n";
+			try
+			{
+				std::string intersectionOne;
+				std::cout << "Intersection 1:";
+				std::cin >> intersectionOne;
+				std::cout << "Intersection 2:";
+				std::string intersectionTwo;
+				std::cin >> intersectionTwo;
+				std::cout << "\n";
+
+				auto paths = algos.YenAlgorithmForThreePaths(map.getCorrespondingNode(intersectionOne), map.getCorrespondingNode(intersectionTwo));
+				if (paths[0].size() || paths[1].size() || paths[2].size())
+				{
+					std::cout << "A path exists between those intersections\n";
+					for (int i = 0; i < 3; i++)
+					{
+						int size = paths[i].size();
+						for (int j = 0; j < size; j++)
+						{
+							std::cout << map.getCorrespondingStreet(paths[i][j]) << " ";
+						}
+						std::cout << "\n";
+					}
+				}
+				else std::cout << "A path does not exist between those intersections\n";
+			}
+			catch (...) { std::cout << "Invalid intersection\n"; }
+			break;
+		case 3:
+			std::cout << "Choose intersection:\n";
+			try
+			{
+				std::string intersection;
+				std::cout << "Intersection 1:";
+				std::cin >> intersection;
+				std::cout << "\n";
+
+				if (algos.isCyclic(map.getCorrespondingNode(intersection)))
+					std::cout << "Yes you can go around the city and come back to THIS node, there is a cycle.\n";
+				else std::cout << "No there is no cycle\n";
+			}
+			catch (...) { std::cout << "Invalid intersection\n"; }
+			break;
+		case 4:
+			std::cout << "Choose intersection:\n";
+			try
+			{
+				std::string intersection;
+				std::cout << "Intersection 1:";
+				std::cin >> intersection;
+				std::cout << "\n";
+
+				int index = map.getCorrespondingNode(intersection);
+				algos.dijkstra(index);
+
+				bool canReachAll = true;
+				std::size_t size = algos.getSize();
+				for (int i = 1; i < size; i++)
+				{
+					if (i != index && !algos.checkPath(i))
+					{
+						canReachAll = false;
+						break;
+					}
+				}
+
+				if (canReachAll)
+					std::cout << "Yes all intersections can be reached.\n";
+				else std::cout << "Unfortunately not all intersections can be reached.\n";
+			}
+			catch (...) { std::cout << "Invalid intersection\n"; }
+			break;
+		}
+
+		std::cout << "\n\n";
+	}
+	
+}
 
 std::vector<Path> Graph::graph[];
 int main(int argc, char* argv[])
@@ -151,45 +263,13 @@ int main(int argc, char* argv[])
 	GraphAlgorithm algos(graph);
 	Map map;
 	
-	// Map to store node value of given intersection
-	//std::unordered_map<std::string, int> map;
 	std::ifstream infile(argv[1], std::ios::in);
 	
+	init(infile, graph, map);
 	// Unique node count
-	// It's size + 1 because nodes start from 1 not 0 so we need to compensate
-	int unique = init(infile, graph, map) + 1;
+	int unique = map.getSize();
 	algos.setSize(unique);
 
 
-	auto paths = algos.YenAlgorithmForThreePaths(1, 4);
-	std::cout << "\nPrinting Paths:\n";
-	for (int i = 0; i < 3; i++)
-	{
-		for (std::size_t j = 0; j < paths[i].size(); j++)
-		{
-			std::cout << map.getCorrespondingStreet(paths[i][j]) << " ";
-		}
-		std::cout << "\n";
-	}
-
-	std::cout << algos.isCyclic(map.getCorrespondingNode("James"));
-	std::cin.get();
-	try
-	{
-		std::string intersection;
-		std::cout << "Intersection 1:";
-		std::cin >> intersection;
-		algos.dijkstra(map.getCorrespondingNode(intersection));
-		std::cout << "Intersection 2:";
-		std::cin >> intersection;
-		if (algos.checkPath(map.getCorrespondingNode(intersection)))
-		{
-			std::cout << "A path exists between those intersections\n";
-		}
-		else std::cout << "A path does not exist between those intersections\n";
-	}
-	catch (...)
-	{
-		std::cout << "Invalid intersection\n";
-	}
+	menu(graph, algos, map);
 }

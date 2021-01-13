@@ -121,7 +121,7 @@ std::vector<std::vector<int>> GraphAlgorithm::YenAlgorithmForThreePaths(std::siz
 	// required to see if there are any nodes that can be removed or if there is a path at all
 	int edgeToRemove = threePaths.firstPath(paths, graph) - 2;
 	
-	if (edgeToRemove > 0)
+	if (edgeToRemove >= 0)
 	{
 		edgeToRemove = threePaths.secondPath(paths, graph, edgeToRemove) - 2;
 
@@ -135,14 +135,14 @@ std::vector<std::vector<int>> GraphAlgorithm::YenAlgorithmForThreePaths(std::siz
 	// Now fill second and third path (if any)
 	auto path = threePaths.getSecond();
 	std::size_t size = path.size();
-	for (int i = 0; i < size; i++)
+	for (int i = size - 1; i >= 0; i--)
 	{
 		paths[1].emplace_back(path[i]);
 	}
 
 	path = threePaths.getThird();
 	size = path.size();
-	for (int i = 0; i < size; i++)
+	for (int i = size - 1; i >= 0; i--)
 	{
 		paths[2].emplace_back(path[i]);
 	}
@@ -151,11 +151,43 @@ std::vector<std::vector<int>> GraphAlgorithm::YenAlgorithmForThreePaths(std::siz
 	return paths;
 }
 
+
 void GraphAlgorithm::fillArrays(std::size_t startingPoint)
 {
 	std::fill(visited, visited + MAXSIZE, false);
 	std::fill(distance, distance + MAXSIZE, INT_MAX);
 	distance[startingPoint] = 0;
+}
+
+bool GraphAlgorithm::isCyclic(int node)
+{
+	bool* recStack = new bool[size];
+
+	std::fill(visited, visited + size, false);
+	std::fill(recStack, recStack + size, false);
+
+	return isCyclicUtil(node, recStack);
+}
+bool GraphAlgorithm::isCyclicUtil(int v, bool * recStack)
+{
+	if (visited[v] == false)
+	{
+		// Mark the current node as visited and part of recursion stack 
+		visited[v] = true;
+		recStack[v] = true;
+		auto grph = graph.getGraph();
+		// Recur for all the vertices adjacent to this vertex 
+		for (int i = 0; i < grph[v].size(); i++)
+		{
+			if (!visited[grph[v][i].to] && isCyclicUtil(grph[v][i].to, recStack))
+				return true;
+			else if (recStack[grph[v][i].to])
+				return true;
+		}
+
+	}
+	recStack[v] = false;
+	return false;
 }
 
 int Paths::firstPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph)
@@ -167,7 +199,7 @@ int Paths::firstPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph)
 	if (first.size() != 0)
 	{
 		size = first.size();
-		for (int i = 0; i < size; i++)
+		for (int i = size - 1; i >= 0; i--)
 		{
 			paths[0].emplace_back(first[i]);
 		}
@@ -183,7 +215,7 @@ int Paths::secondPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph
 {
 	// to remove the second node in the path (as we cant remove the starting point)
 	// if 1-2-3-4 remove 2 from path
-	while (edgeToRemove > 1)
+	while (edgeToRemove >= 1)
 	{
 		// We want to edit the graph so we make a copy to avoid changing the original
 		auto originalGraph = graph.getGraph();
@@ -208,7 +240,7 @@ int Paths::secondPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph
 void Paths::thirdPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph, int edgeToRemove)
 {
 	bool firstIter = true;
-	while (edgeToRemove > 1)
+	while (edgeToRemove >= 1)
 	{
 		auto originalGraph = graph.getGraph();
 		originalGraph.removePath(startingPoint, second[edgeToRemove]);

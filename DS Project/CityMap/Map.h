@@ -10,7 +10,7 @@ public:
 
 	int getCorrespondingNode(const std::string& index) { return mapStreets[index]; }
 	std::string getCorrespondingStreet(int index) { return mapNodes[index]; }
-	unsigned int getSize() { return uniqueIntersections; }
+	unsigned int getSize() { return uniqueIntersections - 1; }
 private:
 	std::unordered_map<std::string, int> mapStreets;
 	std::unordered_map<int, std::string> mapNodes;
