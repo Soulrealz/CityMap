@@ -1,19 +1,10 @@
 #include <fstream>
 #include <sstream>
-#include <unordered_map>
 //#include <string>
 
 #include "GraphAlgorithms.h"
+#include "Map.h"
 
-void addToMap(std::unordered_map<std::string, int>& map, std::string& str, unsigned int& index)
-{
-	// If a unique intersection is added
-	// .at(str) will return invalid index exception
-	// by catching it we create new object which map holds
-	// second parameter is which index its node corresponds to
-	try { map.at(str); }
-	catch (...) { map[str] = index++; }
-}
 std::string takeIntersection(std::string& str, std::size_t& beg, std::size_t& num)
 {
 	std::string substr = str.substr(beg, num);
@@ -63,7 +54,7 @@ void readStreet(std::string strArr[], std::size_t& begIndex)
 	strArr[3] = takeIntersection(strArr[0], begIndex, characterCount);
 	begIndex = i + 1;
 }
-int init(std::ifstream& infile, Graph& graph, std::unordered_map<std::string, int>& map)
+int init(std::ifstream& infile, Graph& graph, Map& map)
 {
 	// How many different intersecitons there are
 	unsigned int uniqueIntersections = 1;
@@ -103,11 +94,13 @@ int init(std::ifstream& infile, Graph& graph, std::unordered_map<std::string, in
 		sstream >> num;
 
 		// Adding both intersections
-		addToMap(map, strArr[1], uniqueIntersections);
-		addToMap(map, strArr[2], uniqueIntersections);
+		map.addStreet(strArr[1]);
+		map.addStreet(strArr[2]);
+		//addToMap(map, strArr[1], uniqueIntersections);
+		//addToMap(map, strArr[2], uniqueIntersections);
 
 		// Adding path
-		graph.addPath(map[strArr[1]], map[strArr[2]], num);
+		graph.addPath(map.getCorrespondingNode(strArr[1]), map.getCorrespondingNode(strArr[2]), num);
 
 		// if input on this line is : Megas XLR 150
 		// begIndex will be > size and below code does not matter
@@ -138,17 +131,17 @@ int init(std::ifstream& infile, Graph& graph, std::unordered_map<std::string, in
 				}
 			}
 			strArr[3] = takeIntersection(str, begIndex, characterCount);
-			addToMap(map, strArr[2], uniqueIntersections);
+			//addToMap(map, strArr[2], uniqueIntersections);
+			map.addStreet(strArr[2]);
 
 			std::stringstream sstream(strArr[3]);
 			sstream >> num;
-			graph.addPath(map[strArr[1]], map[strArr[2]], num);
+			graph.addPath(map.getCorrespondingNode(strArr[1]), map.getCorrespondingNode(strArr[2]), num);
 		}
 	}
 
-	return map.size();
+	return map.getSize();
 }
-
 
 
 std::vector<Path> Graph::graph[];
@@ -156,9 +149,10 @@ int main(int argc, char* argv[])
 {
 	Graph graph;
 	GraphAlgorithm algos(graph);
+	Map map;
 	
 	// Map to store node value of given intersection
-	std::unordered_map<std::string, int> map;
+	//std::unordered_map<std::string, int> map;
 	std::ifstream infile(argv[1], std::ios::in);
 	
 	// Unique node count
@@ -167,22 +161,28 @@ int main(int argc, char* argv[])
 	algos.setSize(unique);
 
 
-	graph.print();
-	std::cout << "\n\n";
+	auto paths = algos.YenAlgorithmForThreePaths(1, 4);
+	std::cout << "\nPrinting Paths:\n";
+	for (int i = 0; i < 3; i++)
+	{
+		for (std::size_t j = 0; j < paths[i].size(); j++)
+		{
+			std::cout << map.getCorrespondingStreet(paths[i][j]) << " ";
+		}
+		std::cout << "\n";
+	}
 
-	algos.YenAlgorithmForThreePaths(1, 4);
-
-
+	std::cout << algos.isCyclic(map.getCorrespondingNode("James"));
 	std::cin.get();
 	try
 	{
 		std::string intersection;
 		std::cout << "Intersection 1:";
 		std::cin >> intersection;
-		algos.dijkstra(map[intersection]);
+		algos.dijkstra(map.getCorrespondingNode(intersection));
 		std::cout << "Intersection 2:";
 		std::cin >> intersection;
-		if (algos.checkPath(map[intersection]))
+		if (algos.checkPath(map.getCorrespondingNode(intersection)))
 		{
 			std::cout << "A path exists between those intersections\n";
 		}
