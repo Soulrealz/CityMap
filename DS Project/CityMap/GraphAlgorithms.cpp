@@ -43,7 +43,6 @@ void GraphAlgorithm::dijkstra(std::size_t startingPoint)
 		}
 	}
 }
-
 std::vector<int> GraphAlgorithm::dijkstra(std::size_t startingPoint, std::size_t endingPoint, std::vector<Path>* graph)
 {
 	// parent array to know where we came from
@@ -107,145 +106,48 @@ std::vector<int> GraphAlgorithm::dijkstra(std::size_t startingPoint, std::size_t
 	return routes;
 }
 
-std::vector<int>* GraphAlgorithm::YenAlgorithmForThreePaths(std::size_t startingPoint, std::size_t endingPoint)
+std::vector<std::vector<int>> GraphAlgorithm::YenAlgorithmForThreePaths(std::size_t startingPoint, std::size_t endingPoint)
 {
 	//Space Complexity - KN where K is amount of desired paths - 1
 	//Time Complexity - O(KN ^ 3) 
-	std::cout << "Printing shortest paths between " << startingPoint << " and " << endingPoint << "\n";
-	
-	// normal dijkstra to find shortest path
-	auto first = dijkstra(startingPoint, endingPoint, graph.getGraph());
-	if (first.size() == 0)
-	{
-		std::cout << "There is no path\n";
-		return;
-	}
-	//print();
-	printPath(first);
-	//std::cout << "\n\n\n";
 
+	std::vector<std::vector<int>> paths;
+	//Reserving space for 3 paths
+	paths.resize(3);
 
-	
+	Paths threePaths;
+	threePaths.setStartEnd(startingPoint, endingPoint);
 	// first.size() - 1 would give starting node so we do - 2
-	// to remove the second node in the path (as we cant remove the starting point)
-	// if 1-2-3-4 remove 2 from path
-	int edgeToRemove = first.size() - 2;
-	auto second = first;
-	second.clear();
-	while (edgeToRemove > 1)
-	{
-		// We want to edit the graph so we make a copy to avoid changing the original
-		auto originalGraph = graph;
-
-		// remove a different node from first shortest path until a second shortest one is found (if there is any)
-		originalGraph.removePath(startingPoint, first[edgeToRemove]);
-		second = dijkstra(startingPoint, endingPoint, originalGraph.getGraph());
-		
-		// If a path has been found already
-		if (second.size() != 0)
-			break;
-		edgeToRemove--;
-	}
-
-	if (second.size() == 0)
-	{
-		std::cout << "There is no second path\n";
-		return;
-	}
-	//print();
-	printPath(second);
-	//std::cout << "\n\n\n";
-
+	// required to see if there are any nodes that can be removed or if there is a path at all
+	int edgeToRemove = threePaths.firstPath(paths, graph) - 2;
 	
-	/*
-	if we have 1-2-3-4-5 as shortest path
-	remove 2 and maybe find 1-3-4-5
-	if found then keep removing from first until u find third
-	aka remove 3 and have 1-2-4-5 if possible or 1-4-5
-	Once all nodes have been removed once(excluding starting and ending) 
-	from first shortest path AND no third path has been found 
-	THEN we start removing nodes from second shortest path.
-	repeat same process that was used with first-second paths but
-	remove from second until u find third (if any)
-
-	source:
-	https://en.wikipedia.org/wiki/Yen%27s_algorithm
-	https://stackoverflow.com/a/53529719/14309138
-
-	PROBLEM WITH THIRD PATH:
-	D -> E, E -> F,
-	D -> A, A -> E,
-	E -> B, B -> F
-	If we have
-	A  B
-	 \  \
-    ^ \^ \
-	D> E >F
-	Assuming D is start and F is finish
-	first path would be 
-	D E F
-	second path would be
-	D A E F
-	now if we remove D -> A (node from second path)
-	algoritm will go D E F aka going through the first shortest
-	so we need to remove D -> E as well
-	which would turn this into an impossible path
-	then we remove A -> E and as we are already on A its also impossible
-	then we remove E -> F and path would be D A E B F
-
-	In short when removing the connection between first and second node in second path
-	remove connection between first and second node in first path
-	to force dijkstra to go into another node
-	*/
-
-	edgeToRemove = second.size() - 2;
-	auto third = second;
-	third.clear();
-	bool firstIter = true;
-	while (edgeToRemove > 1)
+	if (edgeToRemove > 0)
 	{
-		auto originalGraph = graph;
-		originalGraph.removePath(startingPoint, second[edgeToRemove]);
-		if (firstIter)
-		{
-			originalGraph.removePath(startingPoint, first[first.size() - 2]);
-			firstIter = false;
-		}
+		edgeToRemove = threePaths.secondPath(paths, graph, edgeToRemove) - 2;
 
-		third = dijkstra(startingPoint, endingPoint, originalGraph.getGraph());
+		if (edgeToRemove > 0)
+			threePaths.thirdPath(paths, graph, edgeToRemove);
+	}
+	
 
-		if (third.size() != 0)
-			break;
-		edgeToRemove--;
+
+	// First path (if found) is already filled in array
+	// Now fill second and third path (if any)
+	auto path = threePaths.getSecond();
+	std::size_t size = path.size();
+	for (int i = 0; i < size; i++)
+	{
+		paths[1].emplace_back(path[i]);
 	}
 
-	if (third.size() == 0)
+	path = threePaths.getThird();
+	size = path.size();
+	for (int i = 0; i < size; i++)
 	{
-		std::cout << "There is no third path\n";
-		return;
+		paths[2].emplace_back(path[i]);
 	}
-	//print();
-	printPath(third);
-	//std::cout << "\n\n\n";
 
 	// Returning array of 3 vectors with the paths
-	std::vector<int> paths[3];
-	std::size_t size = first.size();
-	for (int i = 0; i < size; i++)
-	{
-		paths[0].emplace_back(first[i]);
-	}
-	size = second.size();
-	for (int i = 0; i < size; i++)
-	{
-		paths[1].emplace_back(second[i]);
-	}
-	size = third.size();
-	for (int i = 0; i < size; i++)
-	{
-		paths[2].emplace_back(third[i]);
-	}
-
 	return paths;
 }
 
@@ -254,4 +156,76 @@ void GraphAlgorithm::fillArrays(std::size_t startingPoint)
 	std::fill(visited, visited + MAXSIZE, false);
 	std::fill(distance, distance + MAXSIZE, INT_MAX);
 	distance[startingPoint] = 0;
+}
+
+int Paths::firstPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph)
+{
+	std::size_t size;
+
+	// normal dijkstra to find shortest path
+	first = graph.dijkstra(startingPoint, endingPoint, graph.getGraphVector());
+	if (first.size() != 0)
+	{
+		size = first.size();
+		for (int i = 0; i < size; i++)
+		{
+			paths[0].emplace_back(first[i]);
+		}
+	}
+
+	// print();
+	// printPath(first);
+	// std::cout << "\n\n\n";
+
+	return first.size();
+}
+int Paths::secondPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph, int edgeToRemove)
+{
+	// to remove the second node in the path (as we cant remove the starting point)
+	// if 1-2-3-4 remove 2 from path
+	while (edgeToRemove > 1)
+	{
+		// We want to edit the graph so we make a copy to avoid changing the original
+		auto originalGraph = graph.getGraph();
+
+		// remove a different node from first shortest path until a second shortest one is found (if there is any)
+		originalGraph.removePath(startingPoint, first[edgeToRemove]);
+		second = graph.dijkstra(startingPoint, endingPoint, originalGraph.getGraph());
+
+
+		// If a path has been found already
+		if (second.size() != 0)
+			break;
+		edgeToRemove--;
+	}
+
+	//print();
+	//printPath(second);
+	//std::cout << "\n\n\n";
+
+	return second.size();
+}
+void Paths::thirdPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph, int edgeToRemove)
+{
+	bool firstIter = true;
+	while (edgeToRemove > 1)
+	{
+		auto originalGraph = graph.getGraph();
+		originalGraph.removePath(startingPoint, second[edgeToRemove]);
+		if (firstIter)
+		{
+			originalGraph.removePath(startingPoint, first[first.size() - 2]);
+			firstIter = false;
+		}
+
+		third = graph.dijkstra(startingPoint, endingPoint, originalGraph.getGraph());
+
+		if (third.size() != 0)
+			break;
+		edgeToRemove--;
+	}
+
+	//print();
+	//printPath(third);
+	//std::cout << "\n\n\n";
 }
