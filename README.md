@@ -23,4 +23,5 @@ one directional streets exist, also path from intersection to another and from t
 --- DONE using DFS
 5. Check if you can go around all intersections without visiting the same intersection twice. If such a feat is possible, calculate that distance
 6. Check if from one intersection you can reach all other intersections
+--- DONE just using dijkstra and checking if dist == INT_MAX
 7. Find all streets that go into a deadend intersection. Street name is formed from the intersection where it starts and the intersection where it ends. Example A -> B -> C. C is a deadend so street name would be "B and C"
