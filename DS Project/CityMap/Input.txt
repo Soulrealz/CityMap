@@ -1,5 +1,21 @@
-Hamilton Lookout 150 Broadway 100
-
-Broadway James 400
-
-Lookout Broadway 50
+a b 3
+b c 4
+b d 5
+b e 10
+d v 4
+c t 9
+e g 7
+g z 4
+t z 7
+e x 2
+d j 5
+a n 1
+n z 1
+b z 10
+j k 4
+d k 8
+v k 1
+c j 5
+j d 2
+c d 2
+a v 20
