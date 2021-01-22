@@ -7,7 +7,8 @@
 void GraphAlgorithm::dijkstra(std::size_t startingPoint)
 {
 	// getting array of vectors
-	auto graph = this->graph.getGraph();
+	std::vector<Path>* graph = this->graph.getAdjList();
+
 	// priority queue to work with closest nodes according to length
 	// defined pair to not write std::pair<int, int> 3 times
 	std::priority_queue<pair, std::vector<pair>, std::greater<pair>> toVisit;
@@ -35,7 +36,7 @@ void GraphAlgorithm::dijkstra(std::size_t startingPoint)
 			// if current node doesnt present shorter path, skip
 			if (distance[node] + neighbor.length >= distance[neighbor.to])
 				continue;
-
+				
 			// updating with new shortest path
 			distance[neighbor.to] = distance[node] + neighbor.length;
 			// adding this node for exploration
@@ -108,44 +109,27 @@ std::vector<int> GraphAlgorithm::dijkstra(std::size_t startingPoint, std::size_t
 
 std::vector<std::vector<int>> GraphAlgorithm::YenAlgorithmForThreePaths(std::size_t startingPoint, std::size_t endingPoint)
 {
-	//Space Complexity - KN where K is amount of desired paths - 1
-	//Time Complexity - O(KN ^ 3) 
-
-	std::vector<std::vector<int>> paths;
-	//Reserving space for 3 paths
-	paths.resize(3);
+	// Space Complexity - KN where K is amount of desired paths - 1
+	// Time Complexity - O(KN ^ 3) 		
 
 	Paths threePaths;
 	threePaths.setStartEnd(startingPoint, endingPoint);
 	// first.size() - 1 would give starting node so we do - 2
 	// required to see if there are any nodes that can be removed or if there is a path at all
-	int edgeToRemove = threePaths.firstPath(paths, graph) - 2;
+	int edgeToRemove = threePaths.firstPath(graph) - 2;
 	
 	if (edgeToRemove >= 0)
 	{
-		edgeToRemove = threePaths.secondPath(paths, graph, edgeToRemove) - 2;
+		edgeToRemove = threePaths.extractShortestPathsFromFirst(graph, edgeToRemove) - 2;
 
-		if (edgeToRemove > 0)
-			threePaths.thirdPath(paths, graph, edgeToRemove);
+		if (edgeToRemove >= 0)
+			threePaths.thirdPath(graph, edgeToRemove);
 	}
 	
-
-
-	// First path (if found) is already filled in array
-	// Now fill second and third path (if any)
-	auto path = threePaths.getSecond();
-	std::size_t size = path.size();
-	for (int i = size - 1; i >= 0; i--)
-	{
-		paths[1].emplace_back(path[i]);
-	}
-
-	path = threePaths.getThird();
-	size = path.size();
-	for (int i = size - 1; i >= 0; i--)
-	{
-		paths[2].emplace_back(path[i]);
-	}
+	std::vector<std::vector<int>> paths;
+	// Reserving space for 3 paths
+	paths.resize(3);
+	fillPathsVector(paths, threePaths);
 
 	// Returning array of 3 vectors with the paths
 	return paths;
@@ -158,6 +142,33 @@ void GraphAlgorithm::fillArrays(std::size_t startingPoint)
 	std::fill(distance, distance + MAXSIZE, INT_MAX);
 	distance[startingPoint] = 0;
 }
+void GraphAlgorithm::fillPathsVector(std::vector<std::vector<int>>& paths, Paths& threePaths) const
+{
+	// first
+	auto path = threePaths.getFirst();
+	std::size_t size = path.size();
+	for (int i = size - 1; i >= 0; i--)
+	{
+		paths[0].emplace_back(path[i]);
+	}
+
+	// second
+	path = threePaths.getSecond();
+	size = path.size();
+	for (int i = size - 1; i >= 0; i--)
+	{
+		paths[1].emplace_back(path[i]);
+	}
+	// third
+	path = threePaths.getThird();
+	size = path.size();
+	for (int i = size - 1; i >= 0; i--)
+	{
+		paths[2].emplace_back(path[i]);
+	}
+
+
+}
 
 bool GraphAlgorithm::isCyclic(int node)
 {
@@ -168,16 +179,16 @@ bool GraphAlgorithm::isCyclic(int node)
 
 	return isCyclicUtil(node, recStack);
 }
-bool GraphAlgorithm::isCyclicUtil(int v, bool * recStack)
+bool GraphAlgorithm::isCyclicUtil(int v, bool* recStack)
 {
 	if (visited[v] == false)
 	{
 		// Mark the current node as visited and part of recursion stack 
 		visited[v] = true;
 		recStack[v] = true;
-		auto grph = graph.getGraph();
+		auto grph = graph.getAdjList();
 		// Recur for all the vertices adjacent to this vertex 
-		for (int i = 0; i < grph[v].size(); i++)
+		for (std::size_t i = 0; i < grph[v].size(); i++)
 		{
 			if (!visited[grph[v][i].to] && isCyclicUtil(grph[v][i].to, recStack))
 				return true;
@@ -190,74 +201,216 @@ bool GraphAlgorithm::isCyclicUtil(int v, bool * recStack)
 	return false;
 }
 
-int Paths::firstPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph)
-{
-	std::size_t size;
 
+int Paths::firstPath(GraphAlgorithm graph)
+{
 	// normal dijkstra to find shortest path
 	first = graph.dijkstra(startingPoint, endingPoint, graph.getGraphVector());
-	if (first.size() != 0)
-	{
-		size = first.size();
-		for (int i = size - 1; i >= 0; i--)
-		{
-			paths[0].emplace_back(first[i]);
-		}
-	}
-
-	// print();
-	// printPath(first);
-	// std::cout << "\n\n\n";
-
 	return first.size();
 }
-int Paths::secondPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph, int edgeToRemove)
+int Paths::extractShortestPathsFromFirst(GraphAlgorithm graph, int edgeToRemove)
 {
+	std::vector<std::vector<int>> allPathsDerivedFromFirst;
 	// to remove the second node in the path (as we cant remove the starting point)
 	// if 1-2-3-4 remove 2 from path
-	while (edgeToRemove >= 1)
+
+	// Force Algorithm to start from THIS node;
+	int start = first.size() - 1;
+	while (edgeToRemove >= 0)	
 	{
-		// We want to edit the graph so we make a copy to avoid changing the original
-		auto originalGraph = graph.getGraph();
-
+		Graph originalGraph = graph.getGraph();
+		
 		// remove a different node from first shortest path until a second shortest one is found (if there is any)
-		originalGraph.removePath(startingPoint, first[edgeToRemove]);
-		second = graph.dijkstra(startingPoint, endingPoint, originalGraph.getGraph());
+		int restoreValue = originalGraph.adjustPath(first[edgeToRemove + 1], first[edgeToRemove]);
+		second = graph.dijkstra(first[start], endingPoint, originalGraph.getAdjList());
 
+		// Restoring original graph to prepare it for next cycle
+		originalGraph.adjustPath(first[edgeToRemove + 1], first[edgeToRemove], restoreValue);
 
-		// If a path has been found already
+		// If a path has been found
+		// add it to the vector of paths
 		if (second.size() != 0)
-			break;
+			addDerivedPath(allPathsDerivedFromFirst, second, first, start);
+
+		// Move start to next node
+		start--;
+		// Remove next connection
 		edgeToRemove--;
 	}
 
-	//print();
-	//printPath(second);
-	//std::cout << "\n\n\n";
-
-	return second.size();
+	// Sets second and potentially third path
+	return firstDerivedPaths(allPathsDerivedFromFirst, graph.getGraph());	
 }
-void Paths::thirdPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph, int edgeToRemove)
+void Paths::thirdPath(GraphAlgorithm graph, int edgeToRemove)
 {
+	std::vector<std::vector<int>> allPathsDerivingFromSecond;
+	// Start depleting from second path
 	bool firstIter = true;
-	while (edgeToRemove >= 1)
+	int start = second.size() - 1;
+	int restoreValue;
+	while (edgeToRemove >= 0)
 	{
-		auto originalGraph = graph.getGraph();
-		originalGraph.removePath(startingPoint, second[edgeToRemove]);
+		Graph originalGraph = graph.getGraph();
+
+		// Restore damaged first path after first iteration
+		if (!firstIter)
+		{
+			originalGraph.adjustPath(first[first.size() - 1], first[first.size() - 2], restoreValue);
+		}
+		originalGraph.adjustPath(second[edgeToRemove + 1], second[edgeToRemove]);
+
+		// Block first path once to force algorithm
+		// to search for path different than first
 		if (firstIter)
 		{
-			originalGraph.removePath(startingPoint, first[first.size() - 2]);
+			restoreValue = originalGraph.adjustPath(first[first.size() - 1], first[first.size() - 2]);
 			firstIter = false;
 		}
 
-		third = graph.dijkstra(startingPoint, endingPoint, originalGraph.getGraph());
+		third = graph.dijkstra(second[start], endingPoint, originalGraph.getAdjList());
 
+		// If path is found add it
 		if (third.size() != 0)
-			break;
+			addDerivedPath(allPathsDerivingFromSecond, third, second, start);
+
 		edgeToRemove--;
+		start--;
 	}
 
-	//print();
-	//printPath(third);
-	//std::cout << "\n\n\n";
+	secondDerivedPaths(allPathsDerivingFromSecond, graph.getGraph());
+}
+
+void Paths::addDerivedPath(std::vector<std::vector<int>>& allPaths, std::vector<int>& derived, std::vector<int>& derivative, int start)
+{
+	int size = derivative.size() - 1;
+	while (start != size)
+		derived.emplace_back(derivative[++start]);
+
+	std::vector<int> copy;
+	copy.resize(derived.size());
+
+	std::size_t secondSize = derived.size();
+	for (std::size_t i = 0; i < secondSize; i++)
+		copy[i] = derived[i];
+
+	derived.clear();
+	allPaths.emplace_back(copy);
+}
+
+int Paths::firstDerivedPaths(std::vector<std::vector<int>>& allPaths, Graph graph)
+{
+	// If only one path is found set to second
+	if (allPaths.size() == 1)
+		return onePathDerivedFromFirst(allPaths);
+
+	// If exactly two paths have been found set them as second and third paths
+	else if (allPaths.size() == 2)
+		return twoPathsDerivedFromFirst(allPaths, graph);
+
+	// Find two shortest paths of the ones that have been found
+	else if (allPaths.size() > 2)
+		return severalPathsDerivedFromFirst(allPaths, graph);
+
+	// There is no path
+	else return -1;
+}
+void Paths::secondDerivedPaths(std::vector<std::vector<int>>& allPaths, Graph graph)
+{
+	if (allPaths.size() == 1)
+		third = allPaths[0];
+	else if (allPaths.size() > 1)
+		numeralPathsDerivedFromSecond(allPaths, graph);
+}
+
+int Paths::onePathDerivedFromFirst(std::vector<std::vector<int>>& allPaths)
+{
+	second = allPaths[0];
+	return second.size();
+}
+int Paths::twoPathsDerivedFromFirst(std::vector<std::vector<int>>& allPaths, Graph graph)
+{
+	// Code to determine which path is shorter
+	unsigned int firstWeight = 0;
+	unsigned int secondWeight = 0;
+	std::size_t firstSize = allPaths[0].size() - 1;
+	std::size_t secondSize = allPaths[1].size() - 1;
+
+	for (std::size_t i = 0; i < firstSize; i++)
+		firstWeight += graph.getLength(allPaths[0][i + 1], allPaths[0][i]);
+	for (std::size_t i = 0; i < secondSize; i++)
+		secondWeight += graph.getLength(allPaths[1][i + 1], allPaths[1][i]);
+
+	// Shorter path is second path
+	if (firstWeight < secondWeight)
+	{
+		second = allPaths[0];
+		third = allPaths[1];
+	}
+	else
+	{
+		second = allPaths[1];
+		third = allPaths[0];
+	}
+
+	return -1;
+}
+int Paths::severalPathsDerivedFromFirst(std::vector<std::vector<int>>& allPaths, Graph graph)
+{
+	unsigned int firstMinWeight = INT_MAX;
+	unsigned int secondMinWeight = INT_MAX;
+	std::size_t firstIndex = INT_MAX;
+	std::size_t secondIndex = INT_MAX;
+
+	std::size_t numOfPaths = allPaths.size();
+	for (std::size_t i = 0; i < numOfPaths; i++)
+	{
+		unsigned int tmpWeight = 0;
+		std::size_t currPathSize = allPaths[i].size() - 1;
+		for (std::size_t j = 0; j < currPathSize; j++)
+		{
+			tmpWeight += graph.getLength(allPaths[i][j + 1], allPaths[i][j]);;
+		}
+
+		if (tmpWeight <= firstMinWeight)
+		{
+			secondMinWeight = firstMinWeight;
+			firstMinWeight = tmpWeight;
+
+			secondIndex = firstIndex;
+			firstIndex = i;
+		}
+		else if (tmpWeight <= secondMinWeight)
+		{
+			secondMinWeight = tmpWeight;
+			secondIndex = i;
+		}
+	}
+
+	second = allPaths[firstIndex];
+	third = allPaths[secondIndex];
+
+	return -1;
+}
+
+void Paths::numeralPathsDerivedFromSecond(std::vector<std::vector<int>>& allPaths, Graph graph)
+{
+	unsigned int minWeight = INT_MAX;
+	std::size_t pathIndex;
+
+	std::size_t numOfPaths = allPaths.size();
+	for (std::size_t i = 0; i < numOfPaths; i++)
+	{
+		unsigned int tmpWeight = 0;
+		std::size_t currPathSize = allPaths[i].size() - 1;
+		for (std::size_t j = 0; j < currPathSize; j++)
+		{
+			tmpWeight += graph.getLength(allPaths[i][j + 1], allPaths[i][j]);
+		}
+
+		if (tmpWeight < minWeight)
+		{
+			minWeight = tmpWeight;
+			pathIndex = i;
+		}
+	}
 }

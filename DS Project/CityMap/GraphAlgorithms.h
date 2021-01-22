@@ -1,6 +1,8 @@
 #pragma once
 #include "Graph.h"
 
+class Paths;
+
 class GraphAlgorithm
 {
 public:
@@ -29,7 +31,7 @@ public:
 	void fillArrays(std::size_t startingPoint);
 
 
-	std::vector<Path>* getGraphVector() const { return graph.getGraph(); }
+	std::vector<Path>* getGraphVector() const { return graph.getAdjList(); }
 	Graph getGraph() const { return graph; }
 
 
@@ -51,14 +53,16 @@ public:
 		}
 		std::cout << "\n";
 	}
-protected:
+private:
 	Graph graph;
 	std::size_t size;
 	bool visited[MAXSIZE];
 	unsigned int distance[MAXSIZE];
 
 
-	bool isCyclicUtil(int v, bool *recStack);
+	bool isCyclicUtil(int v, bool* recStack);
+
+	void fillPathsVector(std::vector<std::vector<int>>& paths, Paths& threePaths) const;
 };
 
 
@@ -75,9 +79,9 @@ public:
 		startingPoint = start;
 		endingPoint = end;
 	}
-	int firstPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph);
-	int secondPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph, int edgeToRemove);
-	void thirdPath(std::vector<std::vector<int>>& paths, GraphAlgorithm graph, int edgeToRemove);
+	int firstPath(GraphAlgorithm graph);
+	int extractShortestPathsFromFirst(GraphAlgorithm graph, int edgeToRemove);
+	void thirdPath(GraphAlgorithm graph, int edgeToRemove);
 
 
 	std::vector<int> getFirst() { return first; }
@@ -131,11 +135,15 @@ private:
 	std::vector<int> first;
 	std::vector<int> second;
 	std::vector<int> third;
-};
 
-struct Subset 
-{
-public:
-	int parent;
-	int rank;
+	void addDerivedPath(std::vector<std::vector<int>>& allPaths, std::vector<int>& derived, std::vector<int>& derivative, int start);
+
+	int firstDerivedPaths(std::vector<std::vector<int>>& allPaths, Graph graph);
+	void secondDerivedPaths(std::vector<std::vector<int>>& allPaths, Graph graph);
+
+	int onePathDerivedFromFirst(std::vector<std::vector<int>>& allPaths);
+	int twoPathsDerivedFromFirst(std::vector<std::vector<int>>& allPaths, Graph graph);
+	int severalPathsDerivedFromFirst(std::vector<std::vector<int>>& allPaths, Graph graph);
+
+	void numeralPathsDerivedFromSecond(std::vector<std::vector<int>>& allPaths, Graph graph);
 };
