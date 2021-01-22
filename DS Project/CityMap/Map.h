@@ -6,10 +6,10 @@ class Map
 public:
 	Map() = default;
 
-	void addStreet(std::string str);
+	void addStreet(const std::string& str);
 
-	int getCorrespondingNode(const std::string& index) { return mapStreets[index]; }
-	std::string getCorrespondingStreet(int index) { return mapNodes[index]; }
+	int getCorrespondingNode(const std::string& index) { return mapStreets.at(index); }
+	std::string getCorrespondingStreet(const int index) { return mapNodes.at(index); }
 	unsigned int getSize() { return uniqueIntersections - 1; }
 private:
 	std::unordered_map<std::string, int> mapStreets;

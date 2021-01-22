@@ -1,6 +1,6 @@
 #include "Map.h"
 
-void Map::addStreet(std::string str)
+void Map::addStreet(const std::string& str)
 {
 	// If a unique intersection is added
 	// .at(str) will return invalid index exception
@@ -11,5 +11,5 @@ void Map::addStreet(std::string str)
 	{ 
 		mapStreets[str] = uniqueIntersections;
 		mapNodes[uniqueIntersections++] = str;
-	}
+	}	
 }
