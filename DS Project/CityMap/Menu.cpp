@@ -158,7 +158,7 @@ void menu::caseSix(Graph& graph, Map& map)
 	for (std::size_t i = 0; i < selected.size(); i++)
 		close.close(selected[i], graph, map);
 }
-void menu::caseSeven(Graph & graph, GraphAlgorithm & algos, Map & map)
+void menu::caseSeven(Graph& graph, GraphAlgorithm& algos, Map& map)
 {
 	std::cout << "Where would you like to start?\n";
 	std::string loc;
@@ -286,9 +286,11 @@ void InteractiveMode::close(std::string& closee, Graph& graph, Map& map)
 			// find node to save length
 			for (std::size_t j = 0; j < adjList[incoming[i]].size(); j++)
 			{
-				// Now we node which connection's length to save
+				// Now we know which node connections length to save
 				if (adjList[incoming[i]][j].to == index)
 				{
+					// incoming[i] = from
+					// index = to
 					closed[incoming[i]][index] = adjList[incoming[i]][j].length;
 					break;
 				}
@@ -298,7 +300,7 @@ void InteractiveMode::close(std::string& closee, Graph& graph, Map& map)
 			graph.adjustPath(incoming[i], index);
 			graph.close(incoming[i], index);
 		}
-
+		
 		// Outgoing
 		std::size_t sizeOut = outgoing.size();
 		for (std::size_t i = 0; i < sizeOut; i++)
@@ -325,23 +327,29 @@ void InteractiveMode::open(std::string& opener, Graph& graph, Map& map)
 		std::size_t outSize = a[index].size();
 		for (std::size_t i = 0; i < outSize; i++)
 		{
-			for (int j = 0; j < 100; j++)
+			for (int j = 0; j < SIZE; j++)
 			{
 				if (closed[index][j] > -1)
 				{
+					if (j > graph.getSize())
+						break;
 					graph.adjustPath(index, j, closed[index][j]);
 					graph.open(index, j);
+					closed[index][j] = -1;					
 				}
 			}			
 		}
 		// Incoming
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < SIZE; i++)
 		{
 			if (closed[i][index] > -1)
 			{
+				if (i > graph.getSize())
+					break;
 				graph.adjustPath(i, index, closed[i][index]);
 				graph.open(i, index);
 				closed[i][index] = -1;
+				
 			}
 		}
 
@@ -394,7 +402,7 @@ void InteractiveMode::move(std::string& loc, GraphAlgorithm& algos, Map& map)
 		else std::cout << loc << " cannot be reached from " << location;
 	}
 }
-void InteractiveMode::tour(GraphAlgorithm & algos, Map & map) const
+void InteractiveMode::tour(GraphAlgorithm& algos, Map& map) const
 {
 	int node = map.getCorrespondingNode(location);
 	algos.dijkstra(node);
@@ -434,7 +442,7 @@ std::vector<int> InteractiveMode::worldTourPath(int node, Graph graph) const
 	WTPUtil(node, visited, graph, wtp);
 	return wtp;
 }
-void InteractiveMode::WTPUtil(int v, bool * visited, Graph graph, std::vector<int>& wtp) const
+void InteractiveMode::WTPUtil(int v, bool* visited, Graph graph, std::vector<int>& wtp) const
 {
 	if (visited[v] == false)
 	{

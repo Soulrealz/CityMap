@@ -42,6 +42,8 @@ public:
 	void close(const std::size_t row, const std::size_t col) { adjMatrix[row][col] = false; }
 	void open(const std::size_t row, const std::size_t col) { adjMatrix[row][col] = true; }
 
+	std::size_t getSize() {return adjMatrix.size();}
+
 	int getLength(const std::size_t from, const std::size_t to) const;
 private:
 	static std::vector<Path> graph[MAXSIZE];

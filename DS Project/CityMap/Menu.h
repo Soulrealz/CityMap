@@ -24,7 +24,13 @@ class InteractiveMode
 {
 public:
 	InteractiveMode();
-	InteractiveMode(std::string& loc) : location(loc) {}
+	InteractiveMode(std::string& loc) : location(loc)
+	{ 
+		for (int i = 0; i < 100; i++)
+		{
+			std::fill(closed[i], closed[i] + SIZE, -1);
+		}
+	}
 
 	void loop(Graph& graph, GraphAlgorithm& algos, Map& map);
 	bool detectCommand(Graph& graph, GraphAlgorithm& algos, Map& map);

@@ -368,7 +368,7 @@ int Paths::severalPathsDerivedFromFirst(std::vector<std::vector<int>>& allPaths,
 		std::size_t currPathSize = allPaths[i].size() - 1;
 		for (std::size_t j = 0; j < currPathSize; j++)
 		{
-			tmpWeight += graph.getLength(allPaths[i][j + 1], allPaths[i][j]);;
+			tmpWeight += graph.getLength(allPaths[i][j + 1], allPaths[i][j]);
 		}
 
 		if (tmpWeight <= firstMinWeight)

@@ -73,7 +73,7 @@ int Graph::adjustPath(const std::size_t from, const std::size_t to, int value)
 {
 	// As it is not mxn matrix
 	// we need to get size of vector in "from" position in array
-	int original;
+	int original = -1;
 	for (std::size_t i = 0; i < graph[from].size(); i++)
 	{
 		// From pos in Array
