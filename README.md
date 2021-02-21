@@ -15,16 +15,23 @@ one directional streets exist, also path from intersection to another and from t
 
 # Tasks
 1. Checks if there is a way to reach one intersection from another given intersection 
+
 --- DONE using dijkstra
 2. Find 3 shortest routes between two given intersections 
+
 --- DONE using Yen Algorithm for K Shortest Paths
 3. If intersections are closed off (construction or w/e) alternatively find the three shortest routes between the two given intersections
+
+--- DONE
 4. Check if given an intersection you can go around a part of the city and get back to where you started from
+
 --- DONE using DFS
 5. Check if you can go around all intersections without visiting the same intersection twice. If such a feat is possible, calculate that distance
 6. Check if from one intersection you can reach all other intersections
+
 --- DONE just using dijkstra and checking if dist == INT_MAX
 7. Find all streets that go into a deadend intersection. Street name is formed from the intersection where it starts and the intersection where it ends. Example A -> B -> C. C is a deadend so street name would be "B and C"
+
 --- DONE created adjMatrix (alongside the List I already had) to easily check with 2 for cycles whether one street is a deadend or not
 
 # INTERACTIVE MODE
