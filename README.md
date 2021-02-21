@@ -31,6 +31,7 @@ one directional streets exist, also path from intersection to another and from t
 1. Location - display where we are
 --- DONE
 2. change @ - move somewhere
+--- DONE
 3. Neighbours - display neighbours
 --- DONE
 4. move @ - like change but displays the path we took
@@ -40,7 +41,6 @@ one directional streets exist, also path from intersection to another and from t
 --- DONE
 7. closed - display all closed ones
 --- DONE
-8. tour
 
 
 # BUG LIST
