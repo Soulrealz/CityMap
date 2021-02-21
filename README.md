@@ -35,6 +35,7 @@ one directional streets exist, also path from intersection to another and from t
 3. Neighbours - display neighbours
 --- DONE
 4. move @ - like change but displays the path we took
+--- DONE
 5. close @ - close an intersection
 --- DONE
 6. open @ - open an intersection
